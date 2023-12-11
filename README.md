@@ -26,7 +26,7 @@ composer require empuxa/laravel-locale-via-api
 Afterward, you might want to copy the vendor files:
 
 ```bash
-php artisan vendor:publish --provider="Empuxa\LocaleViaApi\ServiceProvider"
+php artisan vendor:publish --provider="Empuxa\LocaleViaApi\LocaleViaApiServiceProvider"
 ```
 
 Remember to also update the config file `config/locale-via-api.php` to your needs!
