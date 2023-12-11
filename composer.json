@@ -21,12 +21,12 @@
         "spatie/laravel-package-tools": "^1.0"
     },
     "require-dev": {
-        "laravel/pint": "^1.10",
-        "orchestra/testbench": "^7.0|^8.0",
+        "laravel/pint": "^1.13",
+        "orchestra/testbench": "^7.37|^8.0",
         "pestphp/pest": "^1.23",
         "phpunit/phpunit": "^9.6",
         "roave/security-advisories": "dev-latest",
-        "slevomat/coding-standard": "^8.13"
+        "slevomat/coding-standard": "^8.14"
     },
     "autoload": {
         "psr-4": {
