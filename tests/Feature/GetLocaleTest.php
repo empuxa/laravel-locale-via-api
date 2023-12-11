@@ -4,17 +4,12 @@ use Empuxa\LocaleViaApi\Controllers\GetLocaleController;
 use Illuminate\Support\Facades\Cache;
 
 beforeEach(function () {
-    //$lang     = 'en';
-    //$langPath = realpath(__DIR__ . '/../../resources/lang');
+    File::deleteDirectory(lang_path() . '/en');
 
     if (! File::exists(lang_path('en'))) {
         File::makeDirectory(lang_path() . '/en', 0755, true);
         File::put(lang_path() . '/en/test.php', "<?php return ['title' => 'Test'];");
     }
-});
-
-afterEach(function () {
-    File::deleteDirectory(lang_path() . '/en');
 });
 
 it('uses cache for storing locale data', function () {
