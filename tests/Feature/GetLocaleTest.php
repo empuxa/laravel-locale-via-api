@@ -19,8 +19,8 @@ beforeEach(function () {
 it('uses cache for storing locale data', function () {
     $locale = 'en';
 
-    $cacheDriver   = config('locale-via-api.cache.driver', 'array');
-    $cacheKey      = config('locale-via-api.cache.prefix') . $locale;
+    $cacheDriver = config('locale-via-api.cache.driver', 'array');
+    $cacheKey = config('locale-via-api.cache.prefix') . $locale;
     $cacheDuration = config('locale-via-api.cache.duration');
 
     Cache::shouldReceive('driver')
@@ -38,7 +38,7 @@ it('uses cache for storing locale data', function () {
 
 it('returns a json response with correct structure', function () {
     $controller = new GetLocaleController;
-    $response   = $controller('en');
+    $response = $controller('en');
 
     expect($response)->toBeInstanceOf(Illuminate\Http\JsonResponse::class);
 
@@ -56,7 +56,7 @@ it('returns a json response with correct structure with vendor', function () {
     File::put(lang_path('vendor/test-plugin/en/vendor-test.php'), "<?php return ['title' => 'Vendor Test'];");
 
     $controller = new GetLocaleController;
-    $response   = $controller('en');
+    $response = $controller('en');
 
     expect($response)->toBeInstanceOf(Illuminate\Http\JsonResponse::class);
 
@@ -70,7 +70,7 @@ it('returns a json response with correct structure with vendor', function () {
         ->and($responseData['data']['vendor-test'])->toBe(['title' => 'Vendor Test']);
 
     $expectedHash = md5(json_encode([
-        'test' => ['title' => 'Test'],
+        'test'        => ['title' => 'Test'],
         'vendor-test' => ['title' => 'Vendor Test'],
     ]));
 
