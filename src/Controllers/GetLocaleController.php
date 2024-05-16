@@ -3,6 +3,7 @@
 namespace Empuxa\LocaleViaApi\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
@@ -12,13 +13,17 @@ class GetLocaleController extends Controller
 {
     private const LOCALE_NOT_FOUND = 'Locale not found.';
 
+    private bool $flatten;
+
     /**
      * Handle the incoming request.
      *
      * @throws \Throwable
      */
-    public function __invoke(string $locale): JsonResponse
+    public function __invoke(Request $request, string $locale): JsonResponse
     {
+        $this->flatten = $request->query('flatten', config('locale-via-api.flatten', false));
+
         // Ensure locale is valid and exists
         $this->ensureLocaleIsValid($locale);
         $this->ensureLocaleExists($locale);
@@ -133,10 +138,37 @@ class GetLocaleController extends Controller
                 $key = sprintf('%s.%s', $prefix, $key);
             }
 
-            $data[$key] = File::getRequire($file);
+            $fileData = File::getRequire($file);
+
+            if ($this->flatten) {
+                $flattenedData = $this->flattenArray($fileData, $key);
+                $data = array_merge($data, $flattenedData);
+            } else {
+                $data[$key] = $fileData;
+            }
         }
 
         return $data;
+    }
+
+    /**
+     * Flatten a multi-dimensional associative array with dot notation keys.
+     */
+    protected function flattenArray(array $array, string $prefix = ''): array
+    {
+        $result = [];
+
+        foreach ($array as $key => $value) {
+            $newKey = $prefix ? $prefix . '.' . $key : $key;
+
+            if (is_array($value)) {
+                $result = array_merge($result, $this->flattenArray($value, $newKey));
+            } else {
+                $result[$newKey] = $value;
+            }
+        }
+
+        return $result;
     }
 
     /**

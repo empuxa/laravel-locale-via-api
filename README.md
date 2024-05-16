@@ -43,6 +43,37 @@ For security reasons, it only returns the array from your config and doesn't rea
 Route::get('/locales', ListLocalesController::class);
 ```
 
+By adding `?flatten=true` to the URL, you can get a flat array of all available locales.
+You can also change the default behavior in the config file.
+
+#### Non-flattened response
+```json
+{
+    "data": {
+        "api": {
+            "error": {
+                "401": "Unauthenticated.",
+                "403": "Forbidden.",
+                "404": "Not Found.",
+                "422": "Unprocessable Entity."
+            }
+        }
+    }
+}
+```
+
+#### Flattened response
+```json
+{
+    "data": {
+        "api.error.401": "Unauthenticated.",
+        "api.error.403": "Forbidden.",
+        "api.error.404": "Not Found.",
+        "api.error.422": "Unprocessable Entity."
+    }
+}
+```
+
 ### `Empuxa\LocaleViaApi\Http\Controllers\GetLocaleController`
 This controller returns the contents of a locale directory as JSON.
 If the directory does not exist, it will return an error 404.
