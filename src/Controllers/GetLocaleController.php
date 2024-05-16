@@ -7,6 +7,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Symfony\Component\Finder\SplFileInfo;
 
 class GetLocaleController extends Controller
 {
@@ -112,10 +113,8 @@ class GetLocaleController extends Controller
 
     /**
      * Get the locale file name.
-     *
-     * @param  \Symfony\Component\Finder\SplFileInfo  $file
      */
-    private function getLocaleFileName($file, string $locale): string
+    private function getLocaleFileName(SplFileInfo $file, string $locale): string
     {
         $relativePath = $file->getRelativePath();
         $fileName = Str::before($file->getFilename(), '.');
