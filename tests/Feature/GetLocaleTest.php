@@ -49,10 +49,13 @@ it('returns a json response with correct structure', function () {
         ->and($responseData['data'])->toBe(['test' => ['title' => 'Test']]);
 
     $expectedHash = md5(json_encode(['test' => ['title' => 'Test']]));
+
     expect($responseData['meta']['hash'])->toEqual($expectedHash);
 });
 
 it('returns a json response with correct structure with vendor', function () {
+    config(['locale-via-api.load_vendor_files' => true]);
+
     File::put(lang_path('vendor/test-plugin/en/vendor-test.php'), "<?php return ['title' => 'Vendor Test'];");
 
     $controller = new GetLocaleController;
@@ -65,13 +68,38 @@ it('returns a json response with correct structure with vendor', function () {
     expect($responseData)->toHaveKeys(['data', 'meta'])
         ->and($responseData['data'])->toBeArray()
         ->and($responseData['data'])->toHaveKey('test')
-        ->and($responseData['data'])->toHaveKey('vendor-test')
+        ->and($responseData['data'])->toHaveKey('vendor.test-plugin.vendor-test')
         ->and($responseData['data']['test'])->toBe(['title' => 'Test'])
-        ->and($responseData['data']['vendor-test'])->toBe(['title' => 'Vendor Test']);
+        ->and($responseData['data']['vendor.test-plugin.vendor-test'])->toBe(['title' => 'Vendor Test']);
 
     $expectedHash = md5(json_encode([
-        'test'        => ['title' => 'Test'],
-        'vendor-test' => ['title' => 'Vendor Test'],
+        'test'                           => ['title' => 'Test'],
+        'vendor.test-plugin.vendor-test' => ['title' => 'Vendor Test'],
+    ]));
+
+    expect($responseData['meta']['hash'])->toEqual($expectedHash);
+});
+
+it('returns a json response without vendor files when disabled', function () {
+    config(['locale-via-api.load_vendor_files' => false]);
+
+    File::put(lang_path('vendor/test-plugin/en/vendor-test.php'), "<?php return ['title' => 'Vendor Test'];");
+
+    $controller = new GetLocaleController;
+    $response = $controller('en');
+
+    expect($response)->toBeInstanceOf(Illuminate\Http\JsonResponse::class);
+
+    $responseData = $response->getData(true);
+
+    expect($responseData)->toHaveKeys(['data', 'meta'])
+        ->and($responseData['data'])->toBeArray()
+        ->and($responseData['data'])->toHaveKey('test')
+        ->and($responseData['data'])->not->toHaveKey('vendor.test-plugin.vendor-test')
+        ->and($responseData['data']['test'])->toBe(['title' => 'Test']);
+
+    $expectedHash = md5(json_encode([
+        'test' => ['title' => 'Test'],
     ]));
 
     expect($responseData['meta']['hash'])->toEqual($expectedHash);

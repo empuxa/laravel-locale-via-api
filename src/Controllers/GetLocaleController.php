@@ -7,7 +7,6 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use Symfony\Component\Finder\SplFileInfo;
 
 class GetLocaleController extends Controller
 {
@@ -20,9 +19,11 @@ class GetLocaleController extends Controller
      */
     public function __invoke(string $locale): JsonResponse
     {
+        // Ensure locale is valid and exists
         $this->ensureLocaleIsValid($locale);
         $this->ensureLocaleExists($locale);
 
+        // Get cached data or generate it if not present
         $data = Cache::driver(config('locale-via-api.cache.driver', 'array'))->remember(
             $this->getCacheKey($locale),
             config('locale-via-api.cache.duration', 3600),
@@ -31,6 +32,7 @@ class GetLocaleController extends Controller
             }
         );
 
+        // Return JSON response
         return $this->createJsonResponse($data);
     }
 
@@ -59,7 +61,7 @@ class GetLocaleController extends Controller
      */
     private function getCacheKey(string $locale): string
     {
-        return config('locale-via-api.cache.prefix', 'locale-via-api:') . $locale;
+        return sprintf('%s%s', config('locale-via-api.cache.prefix', 'locale-via-api:'), $locale);
     }
 
     /**
@@ -69,15 +71,17 @@ class GetLocaleController extends Controller
     {
         $data = $this->getLocaleData($locale);
 
-        // Get vendor directories
-        $vendorLocales = File::directories(lang_path('vendor'));
+        if (config('locale-via-api.load_vendor_files', true)) {
+            // Get vendor directories
+            $vendorLocales = File::directories(lang_path('vendor'));
 
-        foreach ($vendorLocales as $vendorLocale) {
-            $vendorName = basename($vendorLocale);
-            $data = array_merge_recursive(
-                $data,
-                $this->getLocaleData(sprintf('vendor/%s/%s', $vendorName, $locale))
-            );
+            foreach ($vendorLocales as $vendorLocale) {
+                $vendorName = basename($vendorLocale);
+                $data = array_merge_recursive(
+                    $data,
+                    $this->getVendorLocaleData(sprintf('vendor/%s/%s', $vendorName, $locale), $vendorName)
+                );
+            }
         }
 
         ksort($data);
@@ -90,8 +94,23 @@ class GetLocaleController extends Controller
      */
     protected function getLocaleData(string $locale): array
     {
+        return $this->loadLocaleFiles(lang_path($locale));
+    }
+
+    /**
+     * Get vendor locale data from files.
+     */
+    protected function getVendorLocaleData(string $path, string $vendorName): array
+    {
+        return $this->loadLocaleFiles(lang_path($path), sprintf('vendor.%s', $vendorName));
+    }
+
+    /**
+     * Load locale files from a given path.
+     */
+    protected function loadLocaleFiles(string $directory, string $prefix = ''): array
+    {
         $data = [];
-        $directory = lang_path($locale);
 
         if (! File::exists($directory)) {
             return $data;
@@ -104,27 +123,20 @@ class GetLocaleController extends Controller
                 continue;
             }
 
-            $fileName = $this->getLocaleFileName($file, $locale);
-            $data[$fileName] = File::getRequire($file);
+            $relativePath = Str::replaceFirst($directory . DIRECTORY_SEPARATOR, '', $file->getPathname());
+            $fileName = Str::before($relativePath, '.');
+
+            // Convert the relative path to a dot notation key
+            $key = Str::replace(DIRECTORY_SEPARATOR, '.', $fileName);
+
+            if ($prefix) {
+                $key = sprintf('%s.%s', $prefix, $key);
+            }
+
+            $data[$key] = File::getRequire($file);
         }
 
         return $data;
-    }
-
-    /**
-     * Get the locale file name.
-     */
-    private function getLocaleFileName(SplFileInfo $file, string $locale): string
-    {
-        $relativePath = $file->getRelativePath();
-        $fileName = Str::before($file->getFilename(), '.');
-
-        if (! Str::is($locale, $relativePath)) {
-            $fileName = Str::replace('/', '.', Str::before($file->getRelativePathname(), '.'));
-            $fileName = Str::replace($locale . '.', '', $fileName);
-        }
-
-        return $fileName;
     }
 
     /**
