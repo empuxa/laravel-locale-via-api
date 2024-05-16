@@ -2,20 +2,24 @@
 
 use Empuxa\LocaleViaApi\Controllers\GetLocaleController;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
 
 beforeEach(function () {
-    File::deleteDirectory(lang_path() . '/en');
+    File::deleteDirectory(lang_path('en'));
+    File::deleteDirectory(lang_path('vendor/test-plugin'));
 
     if (! File::exists(lang_path('en'))) {
-        File::makeDirectory(lang_path() . '/en', 0755, true);
-        File::put(lang_path() . '/en/test.php', "<?php return ['title' => 'Test'];");
+        File::makeDirectory(lang_path('en'), 0755, true);
+        File::makeDirectory(lang_path('vendor/test-plugin/en'), 0755, true);
+
+        File::put(lang_path('en/test.php'), "<?php return ['title' => 'Test'];");
     }
 });
 
 it('uses cache for storing locale data', function () {
     $locale = 'en';
 
-    $cacheDriver = config('locale-via-api.cache.driver', 'sync');
+    $cacheDriver = config('locale-via-api.cache.driver', 'array');
     $cacheKey = config('locale-via-api.cache.prefix') . $locale;
     $cacheDuration = config('locale-via-api.cache.duration');
 
@@ -40,10 +44,63 @@ it('returns a json response with correct structure', function () {
 
     $responseData = $response->getData(true);
 
-    expect($responseData)->toHaveKeys(['data', 'meta']);
-
-    expect($responseData['data'])->toBeArray()->toBe(['test' => ['title' => 'Test']]);
+    expect($responseData)->toHaveKeys(['data', 'meta'])
+        ->and($responseData['data'])->toBeArray()
+        ->and($responseData['data'])->toBe(['test' => ['title' => 'Test']]);
 
     $expectedHash = md5(json_encode(['test' => ['title' => 'Test']]));
+
+    expect($responseData['meta']['hash'])->toEqual($expectedHash);
+});
+
+it('returns a json response with correct structure with vendor', function () {
+    config(['locale-via-api.load_vendor_files' => true]);
+
+    File::put(lang_path('vendor/test-plugin/en/vendor-test.php'), "<?php return ['title' => 'Vendor Test'];");
+
+    $controller = new GetLocaleController;
+    $response = $controller('en');
+
+    expect($response)->toBeInstanceOf(Illuminate\Http\JsonResponse::class);
+
+    $responseData = $response->getData(true);
+
+    expect($responseData)->toHaveKeys(['data', 'meta'])
+        ->and($responseData['data'])->toBeArray()
+        ->and($responseData['data'])->toHaveKey('test')
+        ->and($responseData['data'])->toHaveKey('vendor.test-plugin.vendor-test')
+        ->and($responseData['data']['test'])->toBe(['title' => 'Test'])
+        ->and($responseData['data']['vendor.test-plugin.vendor-test'])->toBe(['title' => 'Vendor Test']);
+
+    $expectedHash = md5(json_encode([
+        'test'                           => ['title' => 'Test'],
+        'vendor.test-plugin.vendor-test' => ['title' => 'Vendor Test'],
+    ]));
+
+    expect($responseData['meta']['hash'])->toEqual($expectedHash);
+});
+
+it('returns a json response without vendor files when disabled', function () {
+    config(['locale-via-api.load_vendor_files' => false]);
+
+    File::put(lang_path('vendor/test-plugin/en/vendor-test.php'), "<?php return ['title' => 'Vendor Test'];");
+
+    $controller = new GetLocaleController;
+    $response = $controller('en');
+
+    expect($response)->toBeInstanceOf(Illuminate\Http\JsonResponse::class);
+
+    $responseData = $response->getData(true);
+
+    expect($responseData)->toHaveKeys(['data', 'meta'])
+        ->and($responseData['data'])->toBeArray()
+        ->and($responseData['data'])->toHaveKey('test')
+        ->and($responseData['data'])->not->toHaveKey('vendor.test-plugin.vendor-test')
+        ->and($responseData['data']['test'])->toBe(['title' => 'Test']);
+
+    $expectedHash = md5(json_encode([
+        'test' => ['title' => 'Test'],
+    ]));
+
     expect($responseData['meta']['hash'])->toEqual($expectedHash);
 });

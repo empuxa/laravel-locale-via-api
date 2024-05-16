@@ -5,7 +5,7 @@ return [
      * We cache the locale for a certain amount of time.
      * To disable caching, set driver to 'array'.
      */
-    'cache'   => [
+    'cache'             => [
         /**
          * The cache driver to use.
          * You can use any driver supported by Laravel.
@@ -27,9 +27,17 @@ return [
     ],
 
     /**
+     * Load vendor files.
+     * If set to true, the package will load the vendor files.
+     * If set to false, you have to load the vendor files yourself.
+     * DEFAULT: true
+     */
+    'load_vendor_files' => true,
+
+    /**
      * Add your supported locales here.
      */
-    'locales' => [
+    'locales'           => [
         'en',
         'de',
     ],
