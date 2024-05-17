@@ -35,6 +35,13 @@ return [
     'load_vendor_files' => true,
 
     /**
+     * Should the output be flattened?
+     * This will return keys as "api.error.401" instead of "api => error => 401".
+     * DEFAULT: false
+     */
+    'flatten'           => false,
+
+    /**
      * Add your supported locales here.
      */
     'locales'           => [
