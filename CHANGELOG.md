@@ -2,6 +2,18 @@
 
 All notable changes to this package will be documented in this file.
 
+## v2.2.0 - 2025-06-02
+
+### What's Changed
+
+* Bump dependabot/fetch-metadata from 2.1.0 to 2.2.0 by @dependabot in https://github.com/empuxa/laravel-locale-via-api/pull/12
+* Bump dependabot/fetch-metadata from 2.2.0 to 2.3.0 by @dependabot in https://github.com/empuxa/laravel-locale-via-api/pull/13
+* Bump aglipanci/laravel-pint-action from 2.4 to 2.5 by @dependabot in https://github.com/empuxa/laravel-locale-via-api/pull/14
+* Bump dependabot/fetch-metadata from 2.3.0 to 2.4.0 by @dependabot in https://github.com/empuxa/laravel-locale-via-api/pull/15
+* feat: add support for Laravel 12 and PHP 8.4 by @marcoraddatz in https://github.com/empuxa/laravel-locale-via-api/pull/16
+
+**Full Changelog**: https://github.com/empuxa/laravel-locale-via-api/compare/v2.1.0...v2.2.0
+
 ## v2.1.0 - 2025-06-02
 
 ### What's Changed
