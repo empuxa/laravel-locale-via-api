@@ -2,6 +2,14 @@
 
 All notable changes to this package will be documented in this file.
 
+## v2.1.0 - 2025-06-02
+
+### What's Changed
+
+* feat: add option to flatten response by @marcoraddatz in https://github.com/empuxa/laravel-locale-via-api/pull/11
+
+**Full Changelog**: https://github.com/empuxa/laravel-locale-via-api/compare/v2.0.0...v2.1.0
+
 ## v2.0.0 - 2024-05-16
 
 ### What's Changed
