@@ -11,7 +11,7 @@ To do so, it converts your PHP lang files to JSON.
 
 ## Requirements
 1. You must provide your lang files within folders, such as `lang/en` or `lang/de`.
-2. The lang files must be in PHP format, such as `lang/en/validation.php.
+2. The lang files must be in PHP format, such as `lang/en/validation.php`.
 3. Must secure the API routes and its patterns on your own.
 
 ## Installation
