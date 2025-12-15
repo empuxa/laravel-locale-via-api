@@ -12,7 +12,7 @@ class ListLocalesController extends Controller
         return response()->json([
             'data' => config('locale-via-api.locales'),
             'meta' => [
-                'hash' => md5(json_encode(config('locale-via-api.locales'))),
+                'hash' => hash('sha256', json_encode(config('locale-via-api.locales'))),
             ],
         ]);
     }
