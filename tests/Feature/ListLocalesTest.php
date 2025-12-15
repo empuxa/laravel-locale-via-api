@@ -17,5 +17,5 @@ it('returns a json response with correct structure and data from ListLocalesCont
 
     expect($responseData['data'])->toBeArray()->toBe($mockedLocales);
 
-    expect($responseData['meta']['hash'])->toEqual(md5(json_encode($mockedLocales)));
+    expect($responseData['meta']['hash'])->toEqual(hash('sha256', json_encode($mockedLocales)));
 });
