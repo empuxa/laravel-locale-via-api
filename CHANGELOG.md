@@ -2,6 +2,15 @@
 
 All notable changes to this package will be documented in this file.
 
+## v3.0.0 - 2026-02-22
+
+### What's Changed
+
+* build(deps): bump dependabot/fetch-metadata from 2.4.0 to 2.5.0 by @dependabot[bot] in https://github.com/empuxa/laravel-locale-via-api/pull/24
+* feat: security improvements by @marcoraddatz in https://github.com/empuxa/laravel-locale-via-api/pull/23
+
+**Full Changelog**: https://github.com/empuxa/laravel-locale-via-api/compare/v2.3.0...v3.0.0
+
 ## v2.2.0 - 2025-06-02
 
 ### What's Changed
