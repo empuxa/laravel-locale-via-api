@@ -51,7 +51,7 @@ it('returns a json response with correct structure', function () {
         ->and($responseData['data'])->toBeArray()
         ->and($responseData['data'])->toBe(['test' => ['title' => 'Test']]);
 
-    $expectedHash = md5(json_encode(['test' => ['title' => 'Test']]));
+    $expectedHash = hash('sha256', json_encode(['test' => ['title' => 'Test']]));
 
     expect($responseData['meta']['hash'])->toEqual($expectedHash);
 });
@@ -76,7 +76,7 @@ it('returns a json response with correct structure with vendor', function () {
         ->and($responseData['data']['test'])->toBe(['title' => 'Test'])
         ->and($responseData['data']['vendor.test-plugin.vendor-test'])->toBe(['title' => 'Vendor Test']);
 
-    $expectedHash = md5(json_encode([
+    $expectedHash = hash('sha256', json_encode([
         'test'                           => ['title' => 'Test'],
         'vendor.test-plugin.vendor-test' => ['title' => 'Vendor Test'],
     ]));
@@ -103,7 +103,7 @@ it('returns a json response without vendor files when disabled', function () {
         ->and($responseData['data'])->not->toHaveKey('vendor.test-plugin.vendor-test')
         ->and($responseData['data']['test'])->toBe(['title' => 'Test']);
 
-    $expectedHash = md5(json_encode([
+    $expectedHash = hash('sha256', json_encode([
         'test' => ['title' => 'Test'],
     ]));
 
@@ -131,7 +131,7 @@ it('returns a flattened json response with correct structure', function () {
             'test.api.error.422' => 'Unprocessable Entity.',
         ]);
 
-    $expectedHash = md5(json_encode([
+    $expectedHash = hash('sha256', json_encode([
         'test.api.error.401' => 'Unauthenticated.',
         'test.api.error.403' => 'Forbidden.',
         'test.api.error.404' => 'Not Found.',
@@ -163,7 +163,7 @@ it('returns a flattened json response with correct structure with vendor', funct
         ->and($responseData['data']['test.api.error.401'])->toBe('Unauthenticated.')
         ->and($responseData['data']['vendor.test-plugin.vendor-test.title'])->toBe('Vendor Test');
 
-    $expectedHash = md5(json_encode([
+    $expectedHash = hash('sha256', json_encode([
         'test.api.error.401'                   => 'Unauthenticated.',
         'test.api.error.403'                   => 'Forbidden.',
         'test.api.error.404'                   => 'Not Found.',
@@ -172,4 +172,48 @@ it('returns a flattened json response with correct structure with vendor', funct
     ]));
 
     expect($responseData['meta']['hash'])->toEqual($expectedHash);
+});
+
+it('returns 404 for path traversal attempts', function () {
+    $controller = new GetLocaleController;
+    $request = new Request;
+
+    $controller($request, '../../../etc/passwd');
+})->throws(Symfony\Component\HttpKernel\Exception\HttpException::class);
+
+it('returns 404 for non-whitelisted locale', function () {
+    $controller = new GetLocaleController;
+    $request = new Request;
+
+    $controller($request, 'fr');
+})->throws(Symfony\Component\HttpKernel\Exception\HttpException::class);
+
+it('returns 404 for locale with special characters', function () {
+    $controller = new GetLocaleController;
+    $request = new Request;
+
+    $controller($request, 'en/../de');
+})->throws(Symfony\Component\HttpKernel\Exception\HttpException::class);
+
+it('respects vendor safelist configuration', function () {
+    config(['locale-via-api.load_vendor_files' => true]);
+    config(['locale-via-api.vendor_safelist' => ['allowed-plugin']]);
+
+    File::makeDirectory(lang_path('vendor/allowed-plugin/en'), 0755, true);
+    File::makeDirectory(lang_path('vendor/blocked-plugin/en'), 0755, true);
+
+    File::put(lang_path('vendor/allowed-plugin/en/allowed.php'), "<?php return ['title' => 'Allowed'];");
+    File::put(lang_path('vendor/blocked-plugin/en/blocked.php'), "<?php return ['title' => 'Blocked'];");
+
+    $controller = new GetLocaleController;
+    $request = new Request;
+    $response = $controller($request, 'en');
+
+    $responseData = $response->getData(true);
+
+    expect($responseData['data'])->toHaveKey('vendor.allowed-plugin.allowed')
+        ->and($responseData['data'])->not->toHaveKey('vendor.blocked-plugin.blocked');
+
+    File::deleteDirectory(lang_path('vendor/allowed-plugin'));
+    File::deleteDirectory(lang_path('vendor/blocked-plugin'));
 });

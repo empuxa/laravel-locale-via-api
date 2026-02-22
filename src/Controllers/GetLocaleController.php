@@ -79,9 +79,16 @@ class GetLocaleController extends Controller
         if (config('locale-via-api.load_vendor_files', true)) {
             // Get vendor directories
             $vendorLocales = File::directories(lang_path('vendor'));
+            $safelist = config('locale-via-api.vendor_safelist');
 
             foreach ($vendorLocales as $vendorLocale) {
                 $vendorName = basename($vendorLocale);
+
+                // Skip if safelist is set and vendor is not in it
+                if (is_array($safelist) && ! in_array($vendorName, $safelist, true)) {
+                    continue;
+                }
+
                 $data = array_merge_recursive(
                     $data,
                     $this->getVendorLocaleData(sprintf('vendor/%s/%s', $vendorName, $locale), $vendorName)
@@ -179,7 +186,7 @@ class GetLocaleController extends Controller
         return response()->json([
             'data' => $data,
             'meta' => [
-                'hash' => md5(json_encode($data)),
+                'hash' => hash('sha256', json_encode($data)),
             ],
         ]);
     }

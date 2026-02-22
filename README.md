@@ -87,6 +87,26 @@ Since this package reads your lang files (and could theoretically read any other
 **Make sure that you only share the locales that you want to share.**
 Add route pattern to do so.
 
+### Security Best Practices
+
+1. **Protect your routes** - Always use authentication middleware on the locale API routes:
+   ```php
+   Route::middleware('auth:sanctum')->group(function () {
+       Route::get('/locales', ListLocalesController::class);
+       Route::get('/locales/{locale}', GetLocaleController::class);
+   });
+   ```
+
+2. **Restrict locale patterns** - Use route constraints to limit valid locale values:
+   ```php
+   Route::get('/locales/{locale}', GetLocaleController::class)
+       ->where('locale', '[a-z]{2}');
+   ```
+
+3. **Protect your lang directory** - This package uses `File::getRequire()` which executes PHP code from locale files. Never allow untrusted users to write to your `lang/` directory.
+
+4. **Use vendor safelist** - If you enable `load_vendor_files`, consider using the `vendor_safelist` config option to restrict which vendor packages are exposed.
+
 ## Testing
 
 ```bash

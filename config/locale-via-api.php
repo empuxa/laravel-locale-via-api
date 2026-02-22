@@ -35,6 +35,14 @@ return [
     'load_vendor_files' => true,
 
     /**
+     * Vendor safelist.
+     * If set to an array, only the listed vendor packages will be loaded.
+     * If set to null, all vendor packages will be loaded (when load_vendor_files is true).
+     * DEFAULT: null (load all)
+     */
+    'vendor_safelist'   => null,
+
+    /**
      * Should the output be flattened?
      * This will return keys as "api.error.401" instead of "api => error => 401".
      * DEFAULT: false
