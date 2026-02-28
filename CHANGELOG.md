@@ -2,6 +2,14 @@
 
 All notable changes to this package will be documented in this file.
 
+## v3.1.0 - 2026-02-28
+
+### What's Changed
+
+* feat: add support for Laravel 13 by @marcoraddatz in https://github.com/empuxa/laravel-locale-via-api/pull/25
+
+**Full Changelog**: https://github.com/empuxa/laravel-locale-via-api/compare/v3.0.0...v3.1.0
+
 ## v3.0.0 - 2026-02-22
 
 ### What's Changed
