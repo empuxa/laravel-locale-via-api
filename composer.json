@@ -1,10 +1,9 @@
 {
     "name": "empuxa/laravel-locale-via-api",
-    "description": "A smart translation manager for Laravel.",
+    "description": "Easily provide your lang files via API.",
     "keywords": [
         "marcoraddatz",
         "empuxa",
-        "translation-manager",
         "i18n"
     ],
     "homepage": "https://github.com/empuxa/laravel-locale-via-api",
@@ -22,8 +21,8 @@
     },
     "require-dev": {
         "laravel/pint": "^1.13",
-        "orchestra/testbench": "^7.37|^8.0|^9.0|^10.0",
-        "pestphp/pest": "^1.23|^2.0|^3.0",
+        "orchestra/testbench": "^7.37|^8.0|^9.0|^10.0|^11.0",
+        "pestphp/pest-plugin-laravel": "^2.0|^3.0|^4.0",
         "roave/security-advisories": "dev-latest",
         "slevomat/coding-standard": "^8.14"
     },
